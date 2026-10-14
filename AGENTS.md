@@ -8,3 +8,8 @@
 > Commits you push to the connected branch sync back to Lovable and show up in
 > the editor, so keep the branch in a working state.
 <!-- LOVABLE:END -->
+
+## Architecture rules
+- Order placement goes through the `place_order` database function, never client-computed totals — prices, stock and coupons must be validated server-side.
+- First account to sign up is auto-granted admin via the signup trigger; roles live only in `user_roles`.
+- Cart lives in localStorage (guest-friendly); everything else (orders, wishlist, reviews) is in the database.
