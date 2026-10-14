@@ -15,6 +15,13 @@
       "when": 1791960231696,
       "tag": "0001_product_images_policies",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1791963561435,
+      "tag": "0002_staff_roles_enum",
+      "breakpoints": true
     }
   ]
 }
