@@ -24,6 +24,7 @@ export const Route = createFileRoute("/shop")({
 
 function Shop() {
   const { q, category, sort } = Route.useSearch();
+  const navigate = Route.useNavigate();
   const { data: cats = [] } = useQuery({
     queryKey: ["categories"],
     queryFn: async () => (await supabase.from("categories").select("*").order("sort")).data ?? [],
@@ -60,7 +61,7 @@ function Shop() {
         ))}
         <select
           value={sort ?? ""}
-          onChange={(e) => (window.location.search = new URLSearchParams({ ...(q && { q }), ...(category && { category }), ...(e.target.value && { sort: e.target.value }) }).toString())}
+          onChange={(e) => navigate({ search: { q, category, sort: e.target.value || undefined } })}
           className="ml-auto rounded-lg border bg-card px-3 py-1.5 text-sm"
         >
           <option value="">Newest</option>
