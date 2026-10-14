@@ -14,6 +14,36 @@ export type Database = {
   }
   public: {
     Tables: {
+      audit_logs: {
+        Row: {
+          action: string
+          actor_email: string | null
+          actor_id: string | null
+          created_at: string
+          id: string
+          meta: Json
+          target: string | null
+        }
+        Insert: {
+          action: string
+          actor_email?: string | null
+          actor_id?: string | null
+          created_at?: string
+          id?: string
+          meta?: Json
+          target?: string | null
+        }
+        Update: {
+          action?: string
+          actor_email?: string | null
+          actor_id?: string | null
+          created_at?: string
+          id?: string
+          meta?: Json
+          target?: string | null
+        }
+        Relationships: []
+      }
       categories: {
         Row: {
           id: string
@@ -56,6 +86,83 @@ export type Database = {
         }
         Relationships: []
       }
+      inventory_transactions: {
+        Row: {
+          actor_email: string | null
+          actor_id: string | null
+          change: number
+          created_at: string
+          id: string
+          new_qty: number
+          old_qty: number
+          product_id: string | null
+          product_name: string
+          reason: string
+        }
+        Insert: {
+          actor_email?: string | null
+          actor_id?: string | null
+          change: number
+          created_at?: string
+          id?: string
+          new_qty: number
+          old_qty: number
+          product_id?: string | null
+          product_name: string
+          reason: string
+        }
+        Update: {
+          actor_email?: string | null
+          actor_id?: string | null
+          change?: number
+          created_at?: string
+          id?: string
+          new_qty?: number
+          old_qty?: number
+          product_id?: string | null
+          product_name?: string
+          reason?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "inventory_transactions_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      notifications: {
+        Row: {
+          body: string
+          created_at: string
+          id: string
+          kind: string
+          link: string | null
+          read: boolean
+          title: string
+        }
+        Insert: {
+          body?: string
+          created_at?: string
+          id?: string
+          kind: string
+          link?: string | null
+          read?: boolean
+          title: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          id?: string
+          kind?: string
+          link?: string | null
+          read?: boolean
+          title?: string
+        }
+        Relationships: []
+      }
       order_items: {
         Row: {
           color: string | null
@@ -90,6 +197,47 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "order_items_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      order_status_history: {
+        Row: {
+          changed_by: string | null
+          changed_by_email: string | null
+          created_at: string
+          field: string
+          id: string
+          new_value: string
+          old_value: string | null
+          order_id: string
+        }
+        Insert: {
+          changed_by?: string | null
+          changed_by_email?: string | null
+          created_at?: string
+          field: string
+          id?: string
+          new_value: string
+          old_value?: string | null
+          order_id: string
+        }
+        Update: {
+          changed_by?: string | null
+          changed_by_email?: string | null
+          created_at?: string
+          field?: string
+          id?: string
+          new_value?: string
+          old_value?: string | null
+          order_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "order_status_history_order_id_fkey"
             columns: ["order_id"]
             isOneToOne: false
             referencedRelation: "orders"
@@ -172,6 +320,7 @@ export type Database = {
           featured: boolean
           id: string
           images: string[]
+          low_stock_threshold: number
           name: string
           price: number
           sku: string
@@ -190,6 +339,7 @@ export type Database = {
           featured?: boolean
           id?: string
           images?: string[]
+          low_stock_threshold?: number
           name: string
           price: number
           sku?: string
@@ -208,6 +358,7 @@ export type Database = {
           featured?: boolean
           id?: string
           images?: string[]
+          low_stock_threshold?: number
           name?: string
           price?: number
           sku?: string
@@ -228,18 +379,24 @@ export type Database = {
       profiles: {
         Row: {
           created_at: string
+          disabled: boolean
+          email: string | null
           full_name: string | null
           id: string
           phone: string | null
         }
         Insert: {
           created_at?: string
+          disabled?: boolean
+          email?: string | null
           full_name?: string | null
           id: string
           phone?: string | null
         }
         Update: {
           created_at?: string
+          disabled?: boolean
+          email?: string | null
           full_name?: string | null
           id?: string
           phone?: string | null
@@ -333,6 +490,47 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_adjust_stock: {
+        Args: { _new_qty: number; _product: string; _reason: string }
+        Returns: undefined
+      }
+      admin_customers: {
+        Args: never
+        Returns: {
+          created_at: string
+          disabled: boolean
+          email: string
+          full_name: string
+          id: string
+          last_order: string
+          last_sign_in: string
+          order_count: number
+          phone: string
+          roles: string[]
+          total_spent: number
+        }[]
+      }
+      admin_set_customer_disabled: {
+        Args: { _disabled: boolean; _uid: string }
+        Returns: undefined
+      }
+      admin_set_role: {
+        Args: {
+          _email: string
+          _grant: boolean
+          _role: Database["public"]["Enums"]["app_role"]
+        }
+        Returns: undefined
+      }
+      admin_staff: {
+        Args: never
+        Returns: {
+          email: string
+          full_name: string
+          roles: string[]
+          user_id: string
+        }[]
+      }
       check_coupon: {
         Args: { _code: string }
         Returns: {
@@ -341,6 +539,7 @@ export type Database = {
           percent_off: number
         }[]
       }
+      has_perm: { Args: { _perm: string; _uid: string }; Returns: boolean }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -348,6 +547,8 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_staff: { Args: { _uid: string }; Returns: boolean }
+      my_perms: { Args: never; Returns: string[] }
       place_order: {
         Args: {
           _coupon: string
@@ -359,6 +560,10 @@ export type Database = {
           order_id: string
           order_reference: string
         }[]
+      }
+      write_audit: {
+        Args: { _action: string; _meta: Json; _target: string }
+        Returns: undefined
       }
     }
     Enums: {
