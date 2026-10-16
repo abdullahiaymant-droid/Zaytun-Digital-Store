@@ -93,7 +93,7 @@ function AdminLayout() {
                 <n.icon className="h-4 w-4" />
                 {n.label}
                 {n.label === "Notifications" && unread > 0 && (
-                  <span className="ml-auto rounded-full bg-gold px-1.5 text-[10px] font-bold text-gold-foreground">{unread}</span>
+                  <span className="ml-auto rounded-full bg-gold px-1.5 text-[10px] font-bold text-foreground">{unread}</span>
                 )}
               </Link>
             ))}
