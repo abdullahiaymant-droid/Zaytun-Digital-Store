@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { CheckCircle2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { naira, statusLabel, ORDER_STATUSES } from "@/lib/format";
+import { naira, statusLabel, TRACK_STEPS, CLOSED_STATUSES } from "@/lib/format";
 
 export const Route = createFileRoute("/_authenticated/order/$id")({
   head: () => ({
@@ -24,7 +24,7 @@ function OrderPage() {
   });
   if (isLoading) return <div className="mx-auto max-w-3xl px-4 py-16 text-muted-foreground">Loading…</div>;
   if (!o) return <div className="mx-auto max-w-3xl px-4 py-16">Order not found.</div>;
-  const steps = ORDER_STATUSES.filter((s) => s !== "cancelled");
+  const steps = TRACK_STEPS;
   const idx = steps.indexOf(o.status);
 
   return (
@@ -35,10 +35,10 @@ function OrderPage() {
         <p className="text-sm opacity-80">Placed {new Date(o.created_at).toLocaleString("en-NG")}</p>
       </div>
 
-      {o.status === "cancelled" ? (
-        <p className="mt-6 rounded-lg bg-destructive/10 p-3 text-destructive">This order was cancelled.</p>
+      {CLOSED_STATUSES.includes(o.status) ? (
+        <p className="mt-6 rounded-lg bg-destructive/10 p-3 text-destructive">This order was {statusLabel[o.status]?.toLowerCase()}.</p>
       ) : (
-        <ol className="mt-6 grid grid-cols-5 gap-1 text-center text-[11px]">
+        <ol className="mt-6 grid grid-cols-7 gap-1 text-center text-[11px]">
           {steps.map((s, i) => (
             <li key={s}>
               <div className={`h-1.5 rounded-full ${i <= idx ? "bg-primary" : "bg-muted"}`} />
