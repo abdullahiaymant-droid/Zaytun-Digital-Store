@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useCart } from "@/lib/cart";
 import { NG_STATES, naira, shippingFor } from "@/lib/format";
+import { BankDetails } from "@/components/BankDetails";
 
 export const Route = createFileRoute("/_authenticated/checkout")({
   head: () => ({
@@ -35,6 +36,7 @@ function Checkout() {
   const [code, setCode] = useState("");
   const [coupon, setCoupon] = useState<{ code: string; percent_off: number; min_order: number } | null>(null);
   const [busy, setBusy] = useState(false);
+  const [paid, setPaid] = useState<{ id: string; ref: string; amount: number } | null>(null);
 
   const discount = coupon && subtotal >= coupon.min_order ? Math.round((subtotal * coupon.percent_off) / 100) : 0;
   const shipping = shippingFor(f.state, subtotal - discount);
@@ -63,8 +65,33 @@ function Checkout() {
     setBusy(false);
     if (error) return toast.error(error.message);
     clear();
+    if (pay === "bank_transfer") {
+      setPaid({ id: data[0].order_id, ref: data[0].order_reference, amount: total });
+      return;
+    }
     nav({ to: "/order/$id", params: { id: data[0].order_id } });
   };
+
+  if (paid)
+    return (
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-foreground/60 p-4">
+        <div className="w-full max-w-md space-y-4 rounded-2xl bg-card p-6 shadow-card">
+          <div>
+            <h2 className="text-xl font-bold">Complete your payment</h2>
+            <p className="text-sm text-muted-foreground">Order {paid.ref} is reserved. Transfer the exact amount below.</p>
+          </div>
+          <BankDetails amount={paid.amount} reference={paid.ref} />
+          <p className="text-xs text-muted-foreground">Put the order reference in the transfer narration so we can confirm it quickly.</p>
+          <button
+            type="button"
+            onClick={() => nav({ to: "/order/$id", params: { id: paid.id } })}
+            className="w-full rounded-lg bg-primary py-3 font-semibold text-primary-foreground"
+          >
+            I have made this transfer
+          </button>
+        </div>
+      </div>
+    );
 
   if (items.length === 0)
     return (

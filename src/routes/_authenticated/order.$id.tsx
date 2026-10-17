@@ -3,6 +3,8 @@ import { useQuery } from "@tanstack/react-query";
 import { CheckCircle2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { naira, statusLabel, TRACK_STEPS, CLOSED_STATUSES } from "@/lib/format";
+import { BankDetails } from "@/components/BankDetails";
+import { waLink } from "@/lib/payment";
 
 export const Route = createFileRoute("/_authenticated/order/$id")({
   head: () => ({
@@ -49,9 +51,18 @@ function OrderPage() {
       )}
 
       {o.payment_method === "bank_transfer" && o.payment_status === "pending" && (
-        <div className="mt-6 rounded-xl border border-gold bg-accent p-4 text-sm text-accent-foreground">
-          <p className="font-semibold">Complete your bank transfer of {naira(o.total)}</p>
-          <p className="mt-1">Use <b>{o.reference}</b> as the transfer narration. Our bank details will be shared via phone/SMS once your order is confirmed.</p>
+        <div className="mt-6 space-y-3 rounded-xl border border-gold bg-secondary p-4">
+          <p className="font-semibold">Payment awaiting confirmation</p>
+          <p className="text-sm text-muted-foreground">If you haven't paid yet, transfer to the account below. We confirm and ship once payment is received.</p>
+          <BankDetails amount={Number(o.total)} reference={o.reference} />
+          <a
+            href={waLink(`Hello, I have paid ${naira(o.total)} for order ${o.reference}. Here is my receipt:`)}
+            target="_blank"
+            rel="noreferrer"
+            className="block w-full rounded-lg bg-primary py-3 text-center font-semibold text-primary-foreground"
+          >
+            Send payment receipt on WhatsApp
+          </a>
         </div>
       )}
 
