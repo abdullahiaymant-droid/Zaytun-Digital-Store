@@ -16,6 +16,7 @@ import { CartProvider } from "@/lib/cart";
 import { SiteFooter, SiteHeader } from "@/components/SiteHeader";
 import { Toaster } from "@/components/ui/sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { MobileNav, WhatsAppButton } from "@/components/MobileNav";
 
 function NotFoundComponent() {
   return (
@@ -118,10 +119,12 @@ function RootComponent() {
       <CartProvider>
         <div className="flex min-h-screen flex-col">
           <SiteHeader />
-          <main className="flex-1">
+          <main className="flex-1 pb-16 md:pb-0">
             <Outlet />
           </main>
-          <SiteFooter />
+          <div className="pb-16 md:pb-0"><SiteFooter /></div>
+          <MobileNav />
+          <WhatsAppButton />
         </div>
         <Toaster position="top-center" />
       </CartProvider>
